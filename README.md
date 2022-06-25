@@ -71,6 +71,16 @@ detailed and interesting usages of the package.
 
 ## Installation
 
+### How to build
+
+```bash
+pip install --no-deps /tmp/tensorflow_pkg/tensorflow-2.9.0-cp38-cp38-macosx_10_13_x86_64.whl
+sh ./configure.sh
+/Users/llv23/Documents/05_machine_learning/dl_gpu_mac/drivers_mac/bazel-macOS-10.13.6/bazel-bin/src/bazel build --verbose_failures --experimental_repo_remote_exec //tensorflow_io_gcs_filesystem/…
+python setup.py bdist_wheel
+python setup.py bdist_wheel --project tensorflow-io-gcs-filesystem
+```
+
 ### Python Package
 
 The `tensorflow-io` Python package can be installed with pip directly using:

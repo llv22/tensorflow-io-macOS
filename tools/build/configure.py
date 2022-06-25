@@ -119,9 +119,9 @@ def write_config():
             bazel_rc.write("build --enable_platform_specific_config\n")
             # Needed for GRPC build
             bazel_rc.write('build:macos --copt="-DGRPC_BAZEL_BUILD"\n')
-            # Stay with 10.14 for macOS
-            bazel_rc.write('build:macos --copt="-mmacosx-version-min=10.14"\n')
-            bazel_rc.write('build:macos --linkopt="-mmacosx-version-min=10.14"\n')
+            # Stay with 10.13 for macOS
+            bazel_rc.write('build:macos --copt="-mmacosx-version-min=10.13"\n')
+            bazel_rc.write('build:macos --linkopt="-mmacosx-version-min=10.13"\n')
             # Warns for unguarded uses of Objective-C APIs
             bazel_rc.write("build:macos --copt=-Wunguarded-availability\n")
             # MSVC (Windows): Standards-conformant preprocessor mode
