@@ -406,9 +406,10 @@ cc_library(
         "@vorbis",
         "//tensorflow_io/core:dataset_ops",
     ] + select({
-        "@bazel_tools//src/conditions:darwin": [
-            "//tools/build/swift:audio_video_swift",
-        ],
+        #
+        # "@bazel_tools//src/conditions:darwin": [
+        #     "//tools/build/swift:audio_video_swift",
+        # ],
         "//conditions:default": [],
     }),
     alwayslink = 1,

@@ -78,15 +78,189 @@ sh ./configure.sh
 export TF_HEADER_DIR=/Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow/include
 export TF_SHARED_LIBRARY_DIR=/Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow
 export TF_SHARED_LIBRARY_NAME=tensorflow_framework
-bazel build --verbose_failures --experimental_repo_remote_exec //tensorflow_io_gcs_filesystem/...
+# cp /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/tensorflow-io-macOS/bazel-bin/tensorflow_io_gcs_filesystem/core/python/ops/libtensorflow_io_gcs_filesystem.so tensorflow_io_gcs_filesystem/core/python/ops
+# https://stackoverflow.com/questions/40260242/how-to-set-c-standard-version-when-build-with-bazel
+bazel build --verbose_failures --experimental_repo_remote_exec --cxxopt='-std=c++14' --macos_sdk_version=10.14 //tensorflow_io_gcs_filesystem/...
 # comment out xcode version check in /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/build_bazel_rules_swift/swift/internal/xcode_swift_toolchain.bzl
 # comment out /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/core/azure-core/inc/azure/core/http/policies/policy.hpp and /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/storage/azure-storage-common/inc/azure/storage/common/internal/storage_per_retry_policy.hpp for std::make_unique
-bazel build --verbose_failures --experimental_repo_remote_exec //tensorflow_io/...
+bazel build --verbose_failures --experimental_repo_remote_exec --cxxopt='-std=c++14' --macos_sdk_version=10.14 //tensorflow_io/...
 # refer to https://stackoverflow.com/questions/73141963/cannot-build-tensorflow-io-linking-tensorflow-io-python-ops-libtensorflow-io-g
 bazel build -s --verbose_failures $BAZEL_OPTIMIZATION --experimental_repo_remote_exec //tensorflow_io/... //tensorflow_io_gcs_filesystem/...
 python setup.py bdist_wheel
 python setup.py bdist_wheel --project tensorflow-io-gcs-filesystem
 ```
+
+1, change /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/build_bazel_rules_swift/swift/internal/xcode_swift_toolchain.bzl
+
+```bash Line 702
+    # # Xcode 11.0 implies Swift 5.1.
+    # if _is_xcode_at_least_version(xcode_config, "11.0"):
+    #     requested_features.append(SWIFT_FEATURE_SUPPORTS_LIBRARY_EVOLUTION)
+    #     requested_features.append(SWIFT_FEATURE_SUPPORTS_PRIVATE_DEPS)
+
+    # # Xcode 11.4 implies Swift 5.2.
+    # if _is_xcode_at_least_version(xcode_config, "11.4"):
+    #     requested_features.append(SWIFT_FEATURE_ENABLE_SKIP_FUNCTION_BODIES)
+
+    # # Xcode 12.5 implies Swift 5.4.
+    # if _is_xcode_at_least_version(xcode_config, "12.5"):
+    #     requested_features.append(SWIFT_FEATURE_SUPPORTS_SYSTEM_MODULE_FLAG)
+```
+
+```bash Line 556
+    # # Xcode 12.0 implies Swift 5.3.
+    # if _is_xcode_at_least_version(xcode_config, "12.0"):
+    #     tool_configs[swift_action_names.PRECOMPILE_C_MODULE] = (
+    #         swift_toolchain_config.driver_tool_config(
+    #             driver_mode = "swiftc",
+    #             env = env,
+    #             execution_requirements = execution_requirements,
+    #             swift_executable = swift_executable,
+    #             toolchain_root = toolchain_root,
+    #             use_param_file = True,
+    #             worker_mode = "wrap",
+    #         )
+    #     )
+```
+
+2, change /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/core/azure-core/src/cryptography/md5.cpp
+/private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/core/azure-core/inc/azure/core/http/policies/policy.hpp
+/private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/core/azure-core/inc/azure/core/internal/http/pipeline.hpp
+
+```bash
+#include "absl/memory/memory.h" 
+std::make_unique to absl::make_unique
+```
+
+3, issue
+
+```bash
+Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
+ld: illegal thread local variable reference to regular symbol __ZN9grpc_core7ExecCtx9exec_ctx_E for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Solution: <https://github.com/grpc/grpc/issues/13856>
+change /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_grpc_grpc/include/grpc/impl/codegen/port_platform.h
+just change MACRO declaration for GPR_GCC_TLS to GPR_PTHREAD_TLS (#define GPR_GCC_TLS 1) -> (#define GPR_PTHREAD_TLS )
+
+4, issue
+
+```bash
+ERROR: /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/tensorflow-io-macOS/tools/build/swift/BUILD:5:14: Compiling Swift module //tools/build/swift:audio_video_swift failed: Exec failed due to IOException: xcrun failed with code 1.
+This most likely indicates that SDK version [10.10] for platform [MacOSX] is unsupported for the target version of xcode.
+Process exited with status 1
+stdout: stderr: xcodebuild: error: SDK "macosx10.10" cannot be located.
+xcodebuild: error: SDK "macosx10.10" cannot be located.
+xcrun: error: unable to lookup item 'Path' in SDK 'macosx10.10'
+```
+
+Solution: <https://github.com/google/mediapipe/issues/130>
+
+```bash
+bazel build --verbose_failures --experimental_repo_remote_exec --cxxopt='-std=c++14' --macos_sdk_version=10.14 //tensorflow_io_gcs_filesystem/...
+bazel build --verbose_failures --experimental_repo_remote_exec --cxxopt='-std=c++14' --macos_sdk_version=10.14 //tensorflow_io/...
+```
+
+check version
+
+```bash
+(tf_io) Orlando:tensorflow-io-macOS llv23$ xcodebuild -showsdks
+iOS SDKs:
+	iOS 12.1                      	-sdk iphoneos12.1
+
+iOS Simulator SDKs:
+	Simulator - iOS 12.1          	-sdk iphonesimulator12.1
+
+macOS SDKs:
+	macOS 10.14                   	-sdk macosx10.14
+	macOS 10.14                   	-sdk macosx10.14
+
+tvOS SDKs:
+	tvOS 12.1                     	-sdk appletvos12.1
+
+tvOS Simulator SDKs:
+	Simulator - tvOS 12.1         	-sdk appletvsimulator12.1
+
+watchOS SDKs:
+	watchOS 5.1                   	-sdk watchos5.1
+
+watchOS Simulator SDKs:
+	Simulator - watchOS 5.1       	-sdk watchsimulator5.1
+```
+
+5, issue
+
+```bash comment out Line 277-278
+/private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/build_bazel_rules_swift/tools/worker/swift_runner.cc
+```
+
+comment out for library  name = "python/ops/libtensorflow_io.so" in Line 16
+
+/Users/llv23/Documents/05_machine_learning/dl_gpu_mac/tensorflow-io-macOS/tensorflow_io/BUILD
+
+cp /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b//execroot/org_tensorflow_io/bazel-out/darwin-fastbuild/bin/tensorflow_io/python/ops/libtensorflow_io.so /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/dl-built-libraries/tensorflow-built/2.9.1-cuda10.1-py3.10/ios/tensorflow_io_gcs_filesystem/core/python/ops
+
+cp /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/dl-built-libraries/tensorflow-built/2.9.1-cuda10.1-py3.10/ios/tensorflow_io_gcs_filesystem/core/python/ops/*.so /Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow_io/python/ops/
+
+6, swift_audio
+
+```bash
+ERROR: /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/tensorflow-io-macOS/tools/build/swift/BUILD:5:14: Compiling Swift module //tools/build/swift:audio_video_swift failed: (Exit 1): worker failed: error executing command 
+  (cd /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/execroot/org_tensorflow_io && \
+  exec env - \
+    APPLE_SDK_PLATFORM=MacOSX \
+    APPLE_SDK_VERSION_OVERRIDE=10.14 \
+  bazel-out/darwin-opt-exec-50AE0418/bin/external/build_bazel_rules_swift/tools/worker/worker swiftc @bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video.swiftmodule-0.params)
+# Configuration: 8e768e62908f0dc2c00112f94b5a81081c8500d096777954be71a7758c743006
+# Execution platform: @local_execution_config_platform//:platform
+<unknown>:0: error: no such file or directory: 'bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video.swiftmodule'
+swift_worker: Could not copy bazel-out/darwin-fastbuild/bin/_swift_incremental/tools/build/swift/audio_video_swift_objs/swift/audio.swift.o to bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video_swift_objs/swift/audio.swift.o (errno 2)
+```
+
+you need to check tensorflow_io/core/BUILD and comments out
+
+```bash
+cc_library(
+    name = "audio_video_ops",
+    srcs = [
+        "kernels/audio_kernels.cc",
+        "kernels/audio_kernels.h",
+        "kernels/audio_video_flac_kernels.cc",
+        "kernels/audio_video_mp3_kernels.cc",
+        "kernels/audio_video_mp4_kernels.cc",
+        "kernels/audio_video_ogg_kernels.cc",
+        "kernels/audio_video_wav_kernels.cc",
+        "kernels/video_kernels.cc",
+        "kernels/video_kernels.h",
+        "ops/audio_ops.cc",
+        "ops/video_ops.cc",
+    ],
+    copts = tf_io_copts(),
+    linkstatic = True,
+    deps = [
+        "@flac",
+        "@minimp3",
+        "@speexdsp",
+        "@minimp4",
+        "@vorbis",
+        "//tensorflow_io/core:dataset_ops",
+    ] + select({
+        #
+        # "@bazel_tools//src/conditions:darwin": [
+        #     "//tools/build/swift:audio_video_swift",
+        # ],
+        "//conditions:default": [],
+    }),
+    alwayslink = 1,
+)
+```
+
+Copy output of all files in /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b//execroot/org_tensorflow_io/bazel-out/darwin-fastbuild/bin/tensorflow_io/python/ops/ to /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/dl-built-libraries/tensorflow-built/2.9.1-cuda10.1-py3.10/ios/tensorflow_io_gcs_filesystem/core/python/ops/
+
+then install for 
+
+cp -rf /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/dl-built-libraries/tensorflow-built/2.9.1-cuda10.1-py3.10/ios/tensorflow_io_gcs_filesystem/core/python/ops/*.so /Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow_io/python/ops/
 
 ### Python Package
 
