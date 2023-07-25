@@ -508,7 +508,7 @@ GCSFileSystemImplementation::GCSFileSystemImplementation(
   TF_VLog(1, "GCS cache max size = %u ; block size = %u ; max staleness = %u",
           max_bytes, block_size, max_staleness);
 
-  file_block_cache = std::make_unique<RamFileBlockCache>(
+  file_block_cache = absl::make_unique<RamFileBlockCache>(
       block_size, max_bytes, max_staleness,
       [this](const std::string& filename, size_t offset, size_t buffer_size,
              char* buffer, TF_Status* status) {
@@ -524,7 +524,7 @@ GCSFileSystemImplementation::GCSFileSystemImplementation(
   if (absl::SimpleAtoi(std::getenv(kStatCacheMaxEntries), &value)) {
     stat_cache_max_entries = static_cast<size_t>(value);
   }
-  stat_cache = std::make_unique<ExpiringLRUCache<GcsFileSystemStat>>(
+  stat_cache = absl::make_unique<ExpiringLRUCache<GcsFileSystemStat>>(
       stat_cache_max_age, stat_cache_max_entries);
 }
 
@@ -536,14 +536,14 @@ GCSFileSystemImplementation::GCSFileSystemImplementation(
       compose(compose),
       block_cache_lock(),
       block_size(block_size) {
-  file_block_cache = std::make_unique<RamFileBlockCache>(
+  file_block_cache = absl::make_unique<RamFileBlockCache>(
       block_size, max_bytes, max_staleness,
       [this](const std::string& filename, size_t offset, size_t buffer_size,
              char* buffer, TF_Status* status) {
         return LoadBufferFromGCS(filename, offset, buffer_size, buffer, this,
                                  status);
       });
-  stat_cache = std::make_unique<ExpiringLRUCache<GcsFileSystemStat>>(
+  stat_cache = absl::make_unique<ExpiringLRUCache<GcsFileSystemStat>>(
       stat_cache_max_age, stat_cache_max_entries);
 }
 

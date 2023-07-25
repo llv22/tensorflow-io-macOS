@@ -1,8 +1,4 @@
-<div align="center">
-  <img src="https://github.com/tensorflow/community/blob/master/sigs/logos/SIGIO.png" width="60%"><br><br>
-</div>
-
------------------
+***
 
 # TensorFlow I/O
 
@@ -74,9 +70,20 @@ detailed and interesting usages of the package.
 ### How to build
 
 ```bash
+conda create -n tf_io python=3.8
+# only python 3.8 is supported with partool.par, so create a new env
+conda activate tf_io
 pip install --no-deps /tmp/tensorflow_pkg/tensorflow-2.9.0-cp38-cp38-macosx_10_13_x86_64.whl
 sh ./configure.sh
-/Users/llv23/Documents/05_machine_learning/dl_gpu_mac/drivers_mac/bazel-macOS-10.13.6/bazel-bin/src/bazel build --verbose_failures --experimental_repo_remote_exec //tensorflow_io_gcs_filesystem/…
+export TF_HEADER_DIR=/Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow/include
+export TF_SHARED_LIBRARY_DIR=/Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow
+export TF_SHARED_LIBRARY_NAME=tensorflow_framework
+bazel build --verbose_failures --experimental_repo_remote_exec //tensorflow_io_gcs_filesystem/...
+# comment out xcode version check in /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/build_bazel_rules_swift/swift/internal/xcode_swift_toolchain.bzl
+# comment out /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/core/azure-core/inc/azure/core/http/policies/policy.hpp and /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/storage/azure-storage-common/inc/azure/storage/common/internal/storage_per_retry_policy.hpp for std::make_unique
+bazel build --verbose_failures --experimental_repo_remote_exec //tensorflow_io/...
+# refer to https://stackoverflow.com/questions/73141963/cannot-build-tensorflow-io-linking-tensorflow-io-python-ops-libtensorflow-io-g
+bazel build -s --verbose_failures $BAZEL_OPTIMIZATION --experimental_repo_remote_exec //tensorflow_io/... //tensorflow_io_gcs_filesystem/...
 python setup.py bdist_wheel
 python setup.py bdist_wheel --project tensorflow-io-gcs-filesystem
 ```
@@ -84,11 +91,13 @@ python setup.py bdist_wheel --project tensorflow-io-gcs-filesystem
 ### Python Package
 
 The `tensorflow-io` Python package can be installed with pip directly using:
+
 ```sh
 $ pip install tensorflow-io
 ```
 
 People who are a little more adventurous can also try our nightly binaries:
+
 ```sh
 $ pip install tensorflow-io-nightly
 ```
@@ -96,9 +105,7 @@ $ pip install tensorflow-io-nightly
 To ensure you have a version of TensorFlow that is compatible with TensorFlow-IO,
 you can specify the `tensorflow` extra requirement during install:
 
-```
-pip install tensorflow-io[tensorflow]
-```
+    pip install tensorflow-io[tensorflow]
 
 Similar extras exist for the `tensorflow-gpu`, `tensorflow-cpu` and `tensorflow-rocm`
 packages.
@@ -108,12 +115,14 @@ packages.
 In addition to the pip packages, the docker images can be used to quickly get started.
 
 For stable builds:
+
 ```sh
 $ docker pull tfsigio/tfio:latest
 $ docker run -it --rm --name tfio-latest tfsigio/tfio:latest
 ```
 
 For nightly builds:
+
 ```sh
 $ docker pull tfsigio/tfio:nightly
 $ docker run -it --rm --name tfio-nightly tfsigio/tfio:nightly
@@ -123,6 +132,7 @@ $ docker run -it --rm --name tfio-nightly tfsigio/tfio:nightly
 
 Once the `tensorflow-io` Python package has been successfully installed, you
 can install the development version of the R package from GitHub via the following:
+
 ```r
 if (!require("remotes")) install.packages("remotes")
 remotes::install_github("tensorflow/io", subdir = "R-package")
@@ -135,64 +145,65 @@ version of TensorFlow I/O according to the table below. You can find the list
 of releases [here](https://github.com/tensorflow/io/releases).
 
 | TensorFlow I/O Version | TensorFlow Compatibility | Release Date |
-| --- | --- | --- |
-| 0.26.0 | 2.9.x | May 17, 2022 |
-| 0.25.0 | 2.8.x | Apr 19, 2022 |
-| 0.24.0 | 2.8.x | Feb 04, 2022 |
-| 0.23.1 | 2.7.x | Dec 15, 2021 |
-| 0.23.0 | 2.7.x | Dec 14, 2021 |
-| 0.22.0 | 2.7.x | Nov 10, 2021 |
-| 0.21.0 | 2.6.x | Sep 12, 2021 |
-| 0.20.0 | 2.6.x | Aug 11, 2021 |
-| 0.19.1 | 2.5.x | Jul 25, 2021 |
-| 0.19.0 | 2.5.x | Jun 25, 2021 |
-| 0.18.0 | 2.5.x | May 13, 2021 |
-| 0.17.1 | 2.4.x | Apr 16, 2021 |
-| 0.17.0 | 2.4.x | Dec 14, 2020 |
-| 0.16.0 | 2.3.x | Oct 23, 2020 |
-| 0.15.0 | 2.3.x | Aug 03, 2020 |
-| 0.14.0 | 2.2.x | Jul 08, 2020 |
-| 0.13.0 | 2.2.x | May 10, 2020 |
-| 0.12.0 | 2.1.x | Feb 28, 2020 |
-| 0.11.0 | 2.1.x | Jan 10, 2020 |
-| 0.10.0 | 2.0.x | Dec 05, 2019 |
-| 0.9.1 | 2.0.x | Nov 15, 2019 |
-| 0.9.0 | 2.0.x | Oct 18, 2019 |
-| 0.8.1 | 1.15.x | Nov 15, 2019 |
-| 0.8.0 | 1.15.x | Oct 17, 2019 |
-| 0.7.2 | 1.14.x | Nov 15, 2019 |
-| 0.7.1 | 1.14.x | Oct 18, 2019 |
-| 0.7.0 | 1.14.x | Jul 14, 2019 |
-| 0.6.0 | 1.13.x | May 29, 2019 |
-| 0.5.0 | 1.13.x | Apr 12, 2019 |
-| 0.4.0 | 1.13.x | Mar 01, 2019 |
-| 0.3.0 | 1.12.0 | Feb 15, 2019 |
-| 0.2.0 | 1.12.0 | Jan 29, 2019 |
-| 0.1.0 | 1.12.0 | Dec 16, 2018 |
-
+| ---------------------- | ------------------------ | ------------ |
+| 0.26.0                 | 2.9.x                    | May 17, 2022 |
+| 0.25.0                 | 2.8.x                    | Apr 19, 2022 |
+| 0.24.0                 | 2.8.x                    | Feb 04, 2022 |
+| 0.23.1                 | 2.7.x                    | Dec 15, 2021 |
+| 0.23.0                 | 2.7.x                    | Dec 14, 2021 |
+| 0.22.0                 | 2.7.x                    | Nov 10, 2021 |
+| 0.21.0                 | 2.6.x                    | Sep 12, 2021 |
+| 0.20.0                 | 2.6.x                    | Aug 11, 2021 |
+| 0.19.1                 | 2.5.x                    | Jul 25, 2021 |
+| 0.19.0                 | 2.5.x                    | Jun 25, 2021 |
+| 0.18.0                 | 2.5.x                    | May 13, 2021 |
+| 0.17.1                 | 2.4.x                    | Apr 16, 2021 |
+| 0.17.0                 | 2.4.x                    | Dec 14, 2020 |
+| 0.16.0                 | 2.3.x                    | Oct 23, 2020 |
+| 0.15.0                 | 2.3.x                    | Aug 03, 2020 |
+| 0.14.0                 | 2.2.x                    | Jul 08, 2020 |
+| 0.13.0                 | 2.2.x                    | May 10, 2020 |
+| 0.12.0                 | 2.1.x                    | Feb 28, 2020 |
+| 0.11.0                 | 2.1.x                    | Jan 10, 2020 |
+| 0.10.0                 | 2.0.x                    | Dec 05, 2019 |
+| 0.9.1                  | 2.0.x                    | Nov 15, 2019 |
+| 0.9.0                  | 2.0.x                    | Oct 18, 2019 |
+| 0.8.1                  | 1.15.x                   | Nov 15, 2019 |
+| 0.8.0                  | 1.15.x                   | Oct 17, 2019 |
+| 0.7.2                  | 1.14.x                   | Nov 15, 2019 |
+| 0.7.1                  | 1.14.x                   | Oct 18, 2019 |
+| 0.7.0                  | 1.14.x                   | Jul 14, 2019 |
+| 0.6.0                  | 1.13.x                   | May 29, 2019 |
+| 0.5.0                  | 1.13.x                   | Apr 12, 2019 |
+| 0.4.0                  | 1.13.x                   | Mar 01, 2019 |
+| 0.3.0                  | 1.12.0                   | Feb 15, 2019 |
+| 0.2.0                  | 1.12.0                   | Jan 29, 2019 |
+| 0.1.0                  | 1.12.0                   | Dec 16, 2018 |
 
 ## Performance Benchmarking
 
 We use [github-pages](https://tensorflow.github.io/io/dev/bench/) to document the results of API performance benchmarks. The benchmark job is triggered on every commit to `master` branch and
-facilitates tracking performance w.r.t commits.
+facilitates tracking performance w\.r.t commits.
 
 ## Contributing
 
 Tensorflow I/O is a community led open source project. As such, the project
 depends on public contributions, bug-fixes, and documentation. Please see:
 
-- [contribution guidelines](CONTRIBUTING.md) for a guide on how to contribute.
-- [development doc](docs/development.md) for instructions on the development environment setup.
-- [tutorials](docs/tutorials) for a list of tutorial notebooks and instructions on how to write one.
+*   [contribution guidelines](CONTRIBUTING.md) for a guide on how to contribute.
+
+*   [development doc](docs/development.md) for instructions on the development environment setup.
+
+*   [tutorials](docs/tutorials) for a list of tutorial notebooks and instructions on how to write one.
 
 ### Build Status and CI
 
-| Build | Status |
-| --- | --- |
-| Linux CPU Python 2 | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py2.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py2.html) |
-| Linux CPU Python 3 | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py3.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py3.html) |
-| Linux GPU Python 2| [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py2.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py2.html) |
-| Linux GPU Python 3| [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py3.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py3.html) |
+| Build              | Status                                                                                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux CPU Python 2 | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py2.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py2.html)         |
+| Linux CPU Python 3 | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py3.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-py3.html)         |
+| Linux GPU Python 2 | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py2.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py2.html) |
+| Linux GPU Python 3 | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py3.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/io/ubuntu-gpu-py3.html) |
 
 Because of manylinux2010 requirement, TensorFlow I/O is built with
 Ubuntu:16.04 + Developer Toolset 7 (GCC 7.3) on Linux. Configuration
@@ -229,12 +240,11 @@ Again, because of the manylinux2010 requirement, on Linux whl packages are alway
 built with Ubuntu 16.04 + Developer Toolset 7. Tests are done on a variatiy of systems
 with different python3 versions to ensure a good coverage:
 
-| Python | Ubuntu 18.04| Ubuntu 20.04 | macOS + osx9 | Windows-2019 |
-| ------- | ----- | ------- | ------- | --------- |
-| 2.7 |  :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | N/A |
-| 3.7 |  :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| 3.8 |  :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-
+| Python | Ubuntu 18.04 | Ubuntu 20.04 | macOS + osx9 | Windows-2019 |
+| ------ | ------------ | ------------ | ------------ | ------------ |
+| 2.7    | ✔️           | ✔️           | ✔️           | N/A          |
+| 3.7    | ✔️           | ✔️           | ✔️           | ✔️           |
+| 3.8    | ✔️           | ✔️           | ✔️           | ✔️           |
 
 TensorFlow I/O has integrations with many systems and cloud vendors such as
 Prometheus, Apache Kafka, Apache Ignite, Google Cloud PubSub, AWS Kinesis,
@@ -248,39 +258,44 @@ through official or non-official emulators. Offline tests are also performed whe
 possible, though systems covered through offine tests may not have the same
 level of coverage as live systems or emulators.
 
-
-|  | Live System | Emulator| CI Integration |  Offline |
-| ------- | ----- | ----- | ----- | ----- |
-| Apache Kafka | :heavy_check_mark:  | | :heavy_check_mark:| |
-| Apache Ignite |  :heavy_check_mark: | |:heavy_check_mark:| |
-| Prometheus |  :heavy_check_mark: | |:heavy_check_mark:| |
-| Google PubSub |   | :heavy_check_mark: |:heavy_check_mark:| |
-| Azure Storage |   | :heavy_check_mark: |:heavy_check_mark:| |
-| AWS Kinesis |   | :heavy_check_mark: |:heavy_check_mark:| |
-| Alibaba Cloud OSS |   | | |  :heavy_check_mark: |
-| Google BigTable/BigQuery |   | to be added | | |
-| Elasticsearch (experimental) |  :heavy_check_mark: | |:heavy_check_mark:| |
-| MongoDB (experimental) |  :heavy_check_mark: | |:heavy_check_mark:| |
-
+|                              | Live System | Emulator    | CI Integration | Offline |
+| ---------------------------- | ----------- | ----------- | -------------- | ------- |
+| Apache Kafka                 | ✔️          |             | ✔️             |         |
+| Apache Ignite                | ✔️          |             | ✔️             |         |
+| Prometheus                   | ✔️          |             | ✔️             |         |
+| Google PubSub                |             | ✔️          | ✔️             |         |
+| Azure Storage                |             | ✔️          | ✔️             |         |
+| AWS Kinesis                  |             | ✔️          | ✔️             |         |
+| Alibaba Cloud OSS            |             |             |                | ✔️      |
+| Google BigTable/BigQuery     |             | to be added |                |         |
+| Elasticsearch (experimental) | ✔️          |             | ✔️             |         |
+| MongoDB (experimental)       | ✔️          |             | ✔️             |         |
 
 References for emulators:
-- Official [PubSub Emulator](https://cloud.google.com/sdk/gcloud/reference/beta/emulators/pubsub/) by Google Cloud for Cloud PubSub.
-- Official [Azurite Emulator](https://github.com/Azure/Azurite) by Azure for Azure Storage.
-- None-official [LocalStack emulator](https://github.com/localstack/localstack) by LocalStack for AWS Kinesis.
 
+*   Official [PubSub Emulator](https://cloud.google.com/sdk/gcloud/reference/beta/emulators/pubsub/) by Google Cloud for Cloud PubSub.
+
+*   Official [Azurite Emulator](https://github.com/Azure/Azurite) by Azure for Azure Storage.
+
+*   None-official [LocalStack emulator](https://github.com/localstack/localstack) by LocalStack for AWS Kinesis.
 
 ## Community
 
-* SIG IO [Google Group](https://groups.google.com/a/tensorflow.org/forum/#!forum/io) and mailing list: [io@tensorflow.org](io@tensorflow.org)
-* SIG IO [Monthly Meeting Notes](https://docs.google.com/document/d/1CB51yJxns5WA4Ylv89D-a5qReiGTC0GYum6DU-9nKGo/edit)
-* Gitter room: [tensorflow/sig-io](https://gitter.im/tensorflow/sig-io)
+*   SIG IO [Google Group](https://groups.google.com/a/tensorflow.org/forum/#!forum/io) and mailing list: [io@tensorflow.org](io@tensorflow.org)
+
+*   SIG IO [Monthly Meeting Notes](https://docs.google.com/document/d/1CB51yJxns5WA4Ylv89D-a5qReiGTC0GYum6DU-9nKGo/edit)
+
+*   Gitter room: [tensorflow/sig-io](https://gitter.im/tensorflow/sig-io)
 
 ## Additional Information
 
-* [Streaming Machine Learning with Tiered Storage and Without a Data Lake](https://www.confluent.io/blog/streaming-machine-learning-with-tiered-storage/) - [Kai Waehner](https://github.com/kaiwaehner)
-* [TensorFlow with Apache Arrow Datasets](https://medium.com/tensorflow/tensorflow-with-apache-arrow-datasets-cdbcfe80a59f) - [Bryan Cutler](https://github.com/BryanCutler)
-* [How to build a custom Dataset for Tensorflow](https://towardsdatascience.com/how-to-build-a-custom-dataset-for-tensorflow-1fe3967544d8) - [Ivelin Ivanov](https://github.com/ivelin)
-* [TensorFlow on Apache Ignite](https://medium.com/tensorflow/tensorflow-on-apache-ignite-99f1fc60efeb) - [Anton Dmitriev](https://github.com/dmitrievanthony)
+*   [Streaming Machine Learning with Tiered Storage and Without a Data Lake](https://www.confluent.io/blog/streaming-machine-learning-with-tiered-storage/) - [Kai Waehner](https://github.com/kaiwaehner)
+
+*   [TensorFlow with Apache Arrow Datasets](https://medium.com/tensorflow/tensorflow-with-apache-arrow-datasets-cdbcfe80a59f) - [Bryan Cutler](https://github.com/BryanCutler)
+
+*   [How to build a custom Dataset for Tensorflow](https://towardsdatascience.com/how-to-build-a-custom-dataset-for-tensorflow-1fe3967544d8) - [Ivelin Ivanov](https://github.com/ivelin)
+
+*   [TensorFlow on Apache Ignite](https://medium.com/tensorflow/tensorflow-on-apache-ignite-99f1fc60efeb) - [Anton Dmitriev](https://github.com/dmitrievanthony)
 
 ## License
 

@@ -16,7 +16,7 @@
 
 rm -f .bazelrc
 
-PYTHON=/Users/llv23/opt/miniconda3/bin/python
+PYTHON=/Users/llv23/opt/miniconda3/envs/tf_ios/bin/python
 if [[ "$#" -gt 0 ]]; then
   PYTHON=$1
 fi
