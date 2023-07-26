@@ -203,7 +203,7 @@ cp /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b//execroot/org_
 
 cp /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/dl-built-libraries/tensorflow-built/2.9.1-cuda10.1-py3.10/ios/tensorflow_io_gcs_filesystem/core/python/ops/*.so /Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow_io/python/ops/
 
-6, swift_audio
+6, now temporiarly disable audio and video module
 
 ```bash
 ERROR: /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/tensorflow-io-macOS/tools/build/swift/BUILD:5:14: Compiling Swift module //tools/build/swift:audio_video_swift failed: (Exit 1): worker failed: error executing command 
