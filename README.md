@@ -2,7 +2,7 @@
 
 # TensorFlow I/O
 
-Currently we have to use python 3.8 to compile and copy .so file to miniconda library path.
+Currently we have to use python 3.8 to compile and copy .so file to miniconda library path. And swift modules compilation is still an open issue.
 
 [![GitHub CI](https://github.com/tensorflow/io/workflows/GitHub%20CI/badge.svg?branch=master)](https://github.com/tensorflow/io/actions?query=branch%3Amaster)
 [![PyPI](https://badge.fury.io/py/tensorflow-io.svg)](https://pypi.org/project/tensorflow-io/)
