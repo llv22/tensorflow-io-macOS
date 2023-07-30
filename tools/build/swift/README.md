@@ -1,0 +1,5 @@
+# README
+
+```bash
+swiftc -framework AVFoundation  -target x86_64-apple-macosx10.14 -sdk $(xcrun --sdk macosx --show-sdk-path) -emit-module-path audio_video.swiftmodule -F__BAZEL_XCODE_DEVELOPER_DIR__/Platforms/MacOSX.platform/Developer/Library/Frameworks -I__BAZEL_XCODE_DEVELOPER_DIR__/Platforms/MacOSX.platform/Developer/usr/lib -emit-object -output-file-map audio_video_swift.output_file_map.json -Xfrontend -DDEBUG -Onone -Xfrontend -serialize-debugging-options -enable-testing -gline-tables-only -Xcc -iquote. -Xcc -iquotebazel-out/darwin-fastbuild/bin -Xfrontend -color-diagnostics -enable-batch-mode -module-name audio_video -parse-as-library -target x86_64-apple-macosx10.14 -Xcc -O0 -Xcc -DDEBUG=1 ../../../tensorflow_io/core/swift/audio.swift ../../../tensorflow_io/core/swift/video.swift
+```

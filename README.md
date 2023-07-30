@@ -87,9 +87,9 @@ bazel build --verbose_failures --experimental_repo_remote_exec --cxxopt='-std=c+
 # comment out /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/core/azure-core/inc/azure/core/http/policies/policy.hpp and /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/com_github_azure_azure_sdk_for_cpp/sdk/storage/azure-storage-common/inc/azure/storage/common/internal/storage_per_retry_policy.hpp for std::make_unique
 bazel build --verbose_failures --experimental_repo_remote_exec --cxxopt='-std=c++14' --macos_sdk_version=10.14 //tensorflow_io/...
 # refer to https://stackoverflow.com/questions/73141963/cannot-build-tensorflow-io-linking-tensorflow-io-python-ops-libtensorflow-io-g
-bazel build -s --verbose_failures $BAZEL_OPTIMIZATION --experimental_repo_remote_exec //tensorflow_io/... //tensorflow_io_gcs_filesystem/...
+bazel build -s --verbose_failures $BAZEL_OPTIMIZATION --experimental_repo_remote_exec --cxxopt='-std=c++14' --macos_sdk_version=10.14 //tensorflow_io/... //tensorflow_io_gcs_filesystem/...
 python setup.py bdist_wheel
-python setup.py bdist_wheel --project tensorflow-io-gcs-filesystem
+python setup.py bdist_wheel --project tensorflow-io-gcs-filesystem``
 ```
 
 1, change /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/build_bazel_rules_swift/swift/internal/xcode_swift_toolchain.bzl
@@ -263,6 +263,59 @@ Copy output of all files in /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1
 then install for 
 
 cp -rf /Users/llv23/Documents/05_machine_learning/dl_gpu_mac/dl-built-libraries/tensorflow-built/2.9.1-cuda10.1-py3.10/ios/tensorflow_io_gcs_filesystem/core/python/ops/*.so /Users/llv23/opt/miniconda3/lib/python3.10/site-packages/tensorflow_io/python/ops/
+
+#### Fix for video and audio module
+
+1. Issue about "<unknown>:0: error: unknown argument: '-debug-prefix-map'"
+
+/private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/external/build_bazel_rules_swift/tools/worker/swift_runner.cc
+Line 279-280 comment out
+
+```bash
+        // consumer("-debug-prefix-map");
+        // consumer(GetCurrentDirectory() + "=.");
+```
+
+2, Issue about "<unknown>:0: error: unknown argument: '-no-clang-module-breadcrumbs'"
+/private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/execroot/org_tensorflow_io/external/build_bazel_rules_swift/swift/internal/compiling.bzl
+
+Line 219 comment out
+
+```bash
+        # Don't embed Clang module breadcrumbs in debug info.
+        swift_toolchain_config.action_config(
+            actions = [swift_action_names.COMPILE],
+            configurators = [
+                swift_toolchain_config.add_arg(
+                    "-Xfrontend",
+                    # "-no-clang-module-breadcrumbs",
+                ),
+            ],
+        ),
+```
+
+/private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/execroot/org_tensorflow_io/bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video.swiftmodule-0.params
+
+Line 11 comment out
+
+```bash
+#-no-clang-module-breadcrumbs
+```
+
+3, Issue ""
+
+```bash
+cd /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/execroot/org_tensorflow_io
+swiftc -framework AVFoundation  -target x86_64-apple-macosx10.14 -sdk $(xcrun --sdk macosx --show-sdk-path) -emit-module-path bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video.swiftmodule -F__BAZEL_XCODE_DEVELOPER_DIR__/Platforms/MacOSX.platform/Developer/Library/Frameworks -I__BAZEL_XCODE_DEVELOPER_DIR__/Platforms/MacOSX.platform/Developer/usr/lib -emit-object -output-file-map bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video_swift.output_file_map.json -Xfrontend -DDEBUG -Onone -Xfrontend -serialize-debugging-options -enable-testing -gline-tables-only -Xcc -iquote. -Xcc -iquotebazel-out/darwin-fastbuild/bin -Xfrontend -color-diagnostics -enable-batch-mode -module-name audio_video -parse-as-library -target x86_64-apple-macosx10.14 -Xcc -O0 -Xcc -DDEBUG=1 tensorflow_io/core/swift/audio.swift tensorflow_io/core/swift/video.swift
+cp bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video_swift_objs/swift/* bazel-out/darwin-fastbuild/bin/_swift_incremental/tools/build/swift/audio_video_swift_objs/swift/
+cd bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video_swift_objs/swift
+ar rcs libaudio_video_swift.a audio.swift.o video.swift.o
+swiftc -framework AVFoundation  -target x86_64-apple-macosx10.14 -sdk $(xcrun --sdk macosx --show-sdk-path) -emit-library audio.swift.o video.swift.o -o libaudio_video_swift.dylib
+cd /private/var/tmp/_bazel_llv23/a82ad01ec0c5d2a91897f1531acdf67b/execroot/org_tensorflow_io
+cp bazel-out/darwin-fastbuild/bin/tools/build/swift/audio_video_swift_objs/swift/libaudio_video_swift.* bazel-out/darwin-fastbuild/bin/tools/build/swift/
+cp bazel-out/darwin-fastbuild/bin/tools/build/swift/libaudio_video_swift.a bazel-out/darwin-fastbuild/bin/tools/build/swift/libaudio_video.a
+cp bazel-out/darwin-fastbuild/bin/tools/build/swift/libaudio_video_swift.dylib bazel-out/darwin-fastbuild/bin/tools/build/swift/libaudio_video.dylib
+```
 
 ### Python Package
 
